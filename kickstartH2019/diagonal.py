@@ -1,6 +1,6 @@
 DEV = True
 
-sample_text = """3
+sample_text = """5
 3
 ..#
 #.#
@@ -13,7 +13,92 @@ sample_text = """3
 #####
 2
 ##
-##"""
+##
+2
+#.
+#.
+2
+#.
+.#"""
+
+samples = [(
+# orig test case 1
+"""3
+..#
+#.#
+#..""", 3), (
+# orig test case 2
+"""5
+.####
+#.###
+##.##
+###.#
+#####""", 2), (
+# orig test case 3
+"""2
+##
+##""", 0), (
+# ALL TWOS
+"""2
+..
+..""", 2), (
+"""2
+#.
+..""", 2), (
+"""2
+.#
+..""", 2), (
+"""2
+..
+.#""", 2), (
+"""2
+..
+#.""", 2), (
+"""2
+##
+..""", 2), (
+"""2
+#.
+.#""", 1), (
+"""2
+#.
+#.""", 2), (
+"""2
+.#
+#.""", 1), (
+# odd cases
+"""3
+##.
+#.#
+###""", 2), (
+"""3
+.##
+#.#
+##.""", 1), (
+"""3
+.##
+###
+##.""", 2), (
+"""3
+.#.
+###
+##.""", 3), (
+"""3
+#.#
+##.
+###""", 1),
+
+]
+
+sample_inputs, sample_outputs = zip(*samples)
+
+sample_text  = str(len(samples))+'\n'+"\n".join(sample_inputs)
+if DEV:
+    print("expected output:\n")
+    print("\n".join("EXPECT Case {}: {}".format(i+1, o) for i, o in enumerate(sample_outputs)))
+    print()
+
+
 
 if DEV:
     from collections import deque
@@ -108,9 +193,9 @@ def solve_diagonals(matrix):
             if not matrix[row][col]:
                 n_flips += flip(matrix, fdiag[i*2+is_odd])
 
-        for fd in fdiag:
-            if all(not matrix[f[0]][f[1]] for f in fd):
-                n_flips += flip(matrix, fd)
+        for d in fdiag+bdiag:
+            if all(not matrix[di[0]][di[1]] for di in d):
+                n_flips += flip(matrix, d)
 
 
         if all(map(all, matrix)):
