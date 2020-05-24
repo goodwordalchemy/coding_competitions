@@ -1,3 +1,5 @@
+import heapq
+
 DEV = False
 
 sample_text = """4
@@ -35,14 +37,19 @@ def h_index(papers):
     N = len(papers)
 
     h_indices = [0]*N
-    citations = [0]*(N+1)
+    citations = []
     for i, count in enumerate(papers):
-        citations[min(count,N)] += 1
-        result = cumsum = 0
-        for j in reversed(range(1, N+1)):
-            cumsum += citations[j]
-            result = max(result, min(j, cumsum))
-        h_indices[i] = result
+        # slightly buggy to go around the corner here...
+        h_indices[i] = h_indices[i-1]
+
+        if count > h_indices[i]:
+            heapq.heappush(citations, count)
+
+        while citations and citations[0] <= h_indices[i]:
+            heapq.heappop(citations)
+
+        if len(citations) >= h_indices[i] + 1:
+            h_indices[i] += 1
 
     return " ".join(map(str, h_indices))
 
