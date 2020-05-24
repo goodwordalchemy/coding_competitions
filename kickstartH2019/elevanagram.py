@@ -19,6 +19,7 @@ samples = [
     ("0 0 0 0 0 0 0 1 0", "NO"),
     ("0 0 0 0 0 0 0 0 0", "YES"),
     ("2 0 0 0 0 0 0 0 0", "YES"),
+    ("3 0 0 0 0 0 0 0 0", "NO"),
 ]
 sample_inputs, sample_outputs = zip(*samples)
 
