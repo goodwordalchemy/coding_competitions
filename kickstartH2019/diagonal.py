@@ -15,15 +15,6 @@ sample_text = """3
 ##
 ##"""
 
-sample_text = """1
-5
-.####
-#.###
-##.##
-###.#
-#####
-"""
-
 if DEV:
     from collections import deque
     from unittest.mock import MagicMock
@@ -81,10 +72,10 @@ def print_matrix(matrix):
 def solve_diagonals(matrix):
     # key insight is that a solutions is guaranteed, and one would never
     # flip the same diagonal twice.
-    print("orig...")
-    for r in matrix:
-        print(r)
-    print()
+
+    # print("orig...")
+    # print_matrix(matrix)
+    # print()
 
     main_diagonal_flip_cases = [
         (False, False),
@@ -117,11 +108,16 @@ def solve_diagonals(matrix):
             if not matrix[row][col]:
                 n_flips += flip(matrix, fdiag[i*2+is_odd])
 
+        for fd in fdiag:
+            if all(not matrix[f[0]][f[1]] for f in fd):
+                n_flips += flip(matrix, fd)
+
+
         if all(map(all, matrix)):
             best = min(best, n_flips)
 
-        print("\nfor case of flip_f={}, flip_b={}".format(flip_f, flip_b))
-        print_matrix(matrix)
+        #print("\nfor case of flip_f={}, flip_b={}".format(flip_f, flip_b))
+        #print_matrix(matrix)
 
     return best
 
