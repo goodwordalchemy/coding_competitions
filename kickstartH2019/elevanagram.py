@@ -66,31 +66,24 @@ def can_elevenagram(A):
     if can_return_early(A):
         return "YES"
 
-    mem = {}
-    def dp(i, j, k):
-        if (i, j, k) in mem:
-            return mem[i,j,k]
-        if j < 0:
-            return False
-        if i == 0 and j > A[0]:
-            return False
+    dp = [[[False]*11 for _ in range(sum(A)+1)] for __ in range(9)]
 
-        if i == 0:
-            mem[i,j,k] = (k - (2*j - A[0])) % 11 == 0
-            return mem[i,j,k]
+    for j in range(A[0]+1):
+        for k in range(11):
+            dp[0][j][k] = (k - (2*j - A[0])) % 11 == 0
 
-        for p in range(A[i]+1):
-            sum_ = k - (i+1) * (2*p-A[i])
-            if dp(i-1, j-p, sum_ % 11):
-                mem[i,j,k] =  True
-                return mem[i,j,k]
+    for i in range(1, 9):
+        for j in range(sum(A)+1):
+            for p in range(A[i]+1):
+                for k in range(11):
+                    sum_ = k - (i+1) * (2*p-A[i])
+                    if dp[i-1][j-p][sum_ % 11]:
+                        dp[i][j][k] = True
 
-        mem[i,j,k] = False
-        return mem[i,j,k]
-
-    result = dp(8, sum(A)//2, 0)
+    result = dp[8][sum(A)//2][0]
 
     return "YES" if result else "NO"
+
 
 def main():
     for i, test_case in enumerate(parse_input()):
