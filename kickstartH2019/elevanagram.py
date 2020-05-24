@@ -11,18 +11,20 @@ sample_text = """6
 0 0 0 0 0 0 0 1 0"""
 
 samples = [
-    # ("0 0 2 0 0 1 0 0 0", "YES"),
-    # ("0 0 0 0 0 0 0 0 12", "YES"),
-    # ("0 0 0 0 2 0 1 1 0", "NO"),
-    # ("3 1 1 1 0 0 0 0 0", "YES"),
-    # ("3 0 0 0 0 0 3 0 2", "YES"),
-    # ("0 0 0 0 0 0 0 1 0", "NO"),
-    # ("0 0 0 0 0 0 0 0 0", "YES"),
-    # ("2 0 0 0 0 0 0 0 0", "YES"),
-    # ("3 0 0 0 0 0 0 0 0", "NO"),
-    # ("0 0 0 0 0 0 0 8 9", "NO"),
-    # ("0 1 0 0 0 0 0 0 0", "NO"),
+    ("0 0 2 0 0 1 0 0 0", "YES"),
+    ("0 0 0 0 0 0 0 0 12", "YES"),
+    ("0 0 0 0 2 0 1 1 0", "NO"),
+    ("3 1 1 1 0 0 0 0 0", "YES"),
+    ("3 0 0 0 0 0 3 0 2", "YES"),
+    ("0 0 0 0 0 0 0 1 0", "NO"),
+    ("0 0 0 0 0 0 0 0 0", "YES"),
+    ("2 0 0 0 0 0 0 0 0", "YES"),
+    ("3 0 0 0 0 0 0 0 0", "NO"),
+    ("0 0 0 0 0 0 0 1 1", "NO"),
+    ("0 1 0 0 0 0 0 0 0", "NO"),
     ("0 0 0 1 0 0 0 0 1", "NO"),
+    ("2 1 0 0 0 0 0 0 0", "YES"),
+    ("0 0 0 0 0 0 1 0 2", "YES"),
 ]
 sample_inputs, sample_outputs = zip(*samples)
 
@@ -60,9 +62,11 @@ def can_elevenagram(A):
             return mem[i,j,k]
         if j < 0:
             return False
+        if i == 0 and j > A[0]:
+            return False
 
         if i == 0:
-            mem[i,j,k] = (k - (2*j - A[0])) % 11 == 0 
+            mem[i,j,k] = (k - (2*j - A[0])) % 11 == 0
             # print("dp called with...",i, j, k)
             # pprint(mem)
             return mem[i,j,k]
@@ -106,10 +110,10 @@ def find_fuckups(low, high):
             continue
         case, ans = get_sample(n)
         result = can_elevenagram(case)
-        # print(case)
-        print("i:{}, expect: {}, wegood?: {}".format(i, ans, result==ans))
+        if result != ans:
+            print("i:{}, expect: {}, wegood?: {}".format(i, ans, result==ans))
 
 
 if __name__ == '__main__':
     main()
-    # find_fuckups(0, 100)
+    # find_fuckups(0, 1000)
