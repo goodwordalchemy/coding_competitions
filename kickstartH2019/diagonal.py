@@ -14,6 +14,7 @@ sample_text = """3
 2
 ##
 ##"""
+
 sample_text = """1
 5
 .####
@@ -33,7 +34,7 @@ if DEV:
 
 
 def parse_input():
-    f = lambda x: 1 if x == "#" else 0
+    f = lambda x: True if x == "#" else False
     n_test_cases = int(input())
     test_cases = []
     for t in range(n_test_cases):
@@ -46,7 +47,7 @@ def parse_input():
     return test_cases
 
 
-def get_diagonals(matrix):
+def get_diagonals(matrix, second_largest_backward=False):
     M, N = len(matrix), len(matrix[0])
     fdiag = [[] for _ in range(M+N-1)]
     bdiag = [[] for _ in range(len(fdiag))]
@@ -59,7 +60,11 @@ def get_diagonals(matrix):
             bdiag[j-i-min_bdiag].append((i,j))
 
     mainf = fdiag[(M+N-1) // 2]
-    mainb = bdiag[(M+N-1) // 2]
+
+    if second_largest_backward:
+        mainb = bdiag[max(0, (M+N-1) // 2-1)]
+    else:
+        mainb = bdiag[(M+N-1) // 2]
 
     return mainf, mainb, fdiag, bdiag
 
@@ -69,9 +74,17 @@ def flip(matrix, diagonal_cells):
 
     return 1
 
+def print_matrix(matrix):
+    for r in matrix:
+        print(r)
+
 def solve_diagonals(matrix):
     # key insight is that a solutions is guaranteed, and one would never
     # flip the same diagonal twice.
+    print("orig...")
+    for r in matrix:
+        print(r)
+    print()
 
     main_diagonal_flip_cases = [
         (False, False),
@@ -80,19 +93,14 @@ def solve_diagonals(matrix):
         (True, True),
     ]
 
-    mainf, mainb, fdiag, bdiag = get_diagonals(matrix)
-    # print("\nfdiags:")
-    # for fd in fdiag:
-    #     print(fd)
-    # print("\nbdiags:")
-    # for bd in bdiag:
-    #     print(bd)
-    # print("\nmainf: {}".format(mainf)) 
-    # print("\nmainb: {}".format(mainb)) 
-    # import ipdb; ipdb.set_trace()
+    is_odd = len(matrix)&1
+    mainf, mainb, fdiag, bdiag = get_diagonals(matrix, is_odd)
+
+    matrix_copy = matrix
 
     best = float('inf')
     for flip_f, flip_b in main_diagonal_flip_cases:
+        matrix = [r.copy() for r in matrix_copy]
         n_flips = 0
 
         if flip_f:
@@ -100,16 +108,20 @@ def solve_diagonals(matrix):
         if flip_b:
             n_flips += flip(matrix, mainb)
 
+
         for i, (row, col) in enumerate(mainf):
             if not matrix[row][col]:
                 n_flips += flip(matrix, bdiag[i*2])
 
         for i, (row, col) in enumerate(mainb):
             if not matrix[row][col]:
-                n_flips += flip(matrix, fdiag[i*2])
+                n_flips += flip(matrix, fdiag[i*2+is_odd])
 
         if all(map(all, matrix)):
             best = min(best, n_flips)
+
+        print("\nfor case of flip_f={}, flip_b={}".format(flip_f, flip_b))
+        print_matrix(matrix)
 
     return best
 
