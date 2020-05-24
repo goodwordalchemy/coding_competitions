@@ -51,7 +51,21 @@ def parse_input():
 
     return test_cases
 
+def can_return_early(A):
+    gte10 = gte6 = 0
+    for elt in A:
+        if elt >= 10:
+            gte10 += 1
+        if elt >= 6:
+            gte6 += 1
+
+    return gte10 >= 2 or gte6 >= 3
+
+
 def can_elevenagram(A):
+    if can_return_early(A):
+        return "YES"
+
     mem = {}
     def dp(i, j, k):
         if (i, j, k) in mem:
