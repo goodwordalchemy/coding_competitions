@@ -68,6 +68,58 @@ def parse_input():
     return test_cases
 
 def walk(w, h, l, u, r, d):
+    def reduced_combinations(n, k):
+        exponent = (
+            log2factorial(n)
+            - log2factorial(k)
+            - log2factorial(n-k)
+            - n
+        )
+
+        return 2**exponent
+
+    def probability(x, y):
+        n_moves_to_pos = x + y
+        return reduced_combinations(n_moves_to_pos, y)
+
+    if u == 1 and d == h:
+        return 0.0
+    elif l == 1 and r == w:
+        return 0.0
+
+    w -= 1
+    h -= 1
+    l -= 1
+    u -= 1
+    r -= 1
+    d -= 1
+
+    p = 0
+    if u != 0:
+        for x in range(l, min(r+1, w)):
+            p += probability(x, u-1)
+
+    if l != 0:
+        for y in range(u, min(d+1, h)):
+            p += probability(l-1, y)
+
+    if r == w:
+        for y in range(u):
+            p += probability(r-1, y)
+    if d == h:
+        for x in range(l):
+            p += probability(x, h-1)
+
+    return 1 - p / 2
+
+
+
+def walk_fuck(w, h, l, u, r, d):
+    if u == 1 and d == h:
+        return 0.0
+    elif l == 1 and r == w:
+        return 0.0
+
     def get_guarantee_positions():
         positions = []
 
@@ -101,7 +153,8 @@ def walk(w, h, l, u, r, d):
 
         return 2**exponent
 
-    def get_position_probability(y, x):
+    def get_position_probability(y, x, depth=0):
+        assert depth <= 1
         n_moves_to_pos = x + y - 2
 
         if x != w and y != h:
@@ -117,11 +170,11 @@ def walk(w, h, l, u, r, d):
         if x == w:
             p = 0.5**(w-1)
             for yy in range(2, y+1):
-                p += 0.5 * get_position_probability(yy, x-1)
+                p += 0.5 * get_position_probability(yy, x-1, depth+1)
         if y == h:
             p = 0.5**(h-1)
             for xx in range(2, x+1):
-                p += 0.5 * get_position_probability(y-1, xx)
+                p += 0.5 * get_position_probability(y-1, xx, depth+1)
 
         return p
 
