@@ -19,8 +19,8 @@ samples = [
     ("5 4 3 4 3 4", 0.5),
     ("3 3 2 1 2 3", 0),
     ("3 3 1 2 3 2", 0),
-    ("3 3 3 1 3 2", 0),
-    ("100000 100000 2 2 2 2", -1),
+    ("3 3 3 1 3 2", 0.5),
+    ("100000 100000 2 2 2 2", 0.5),
     ("100000 100000 99999 99999 99999 99999", -1),
 ]
 sample_inputs, sample_outputs = zip(*samples)
@@ -39,6 +39,24 @@ if DEV:
 
     input = MagicMock(side_effect=lambda : sample_lines.popleft())
 
+
+class Log2Factorial:
+    """
+    cache[i] = log2(i!)
+    because log of products is sum of logs
+    """
+    def __init__(self):
+        cache = [0]
+        for i in range(1, 200001): 
+            cache.append(cache[-1]+log2(i))
+
+        self.cache = cache
+
+    def query(self, i):
+        return self.cache[i]
+
+
+log2factorial = Log2Factorial().query
 
 
 def parse_input():
@@ -75,9 +93,9 @@ def walk(w, h, l, u, r, d):
 
     def reduced_combinations(n, k):
         exponent = (
-            log2(factorial(n))
-            - log2(factorial(k))
-            - log2(factorial(n-k))
+            log2factorial(n)
+            - log2factorial(k)
+            - log2factorial(n-k)
             - n
         )
 
@@ -87,8 +105,7 @@ def walk(w, h, l, u, r, d):
         n_moves_to_pos = x + y - 2
 
         if x != w and y != h:
-            p = (0.5)**n_moves_to_pos
-            p *= reduced_combinations(n_moves_to_pos, y-1) * 2**(n_moves_to_pos)
+            p = reduced_combinations(n_moves_to_pos, y-1)
 
         """
         The thinking here is that, if we are in the last row or last column,
