@@ -63,6 +63,9 @@ def can_return_early(A):
 
 
 def can_elevenagram(A):
+    for i, elt in enumerate(A):
+        if A[i]> 20:
+            A[i] = 20 + (elt&1)
     if can_return_early(A):
         return "YES"
 

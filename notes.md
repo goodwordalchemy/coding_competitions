@@ -13,7 +13,7 @@
 ### 2019H
 - [x] H-index
 - [x] Diagonal Puzzle (3 hours with analysis in front of me)
-- [ ] Elevanagram
+- [x] Elevanagram
 
 * h_index was greedy with a priority queue, and very hard for me.  How do you prove 
 greedy algorithms sufficiently?  I might have come up with that algorithm, but 
