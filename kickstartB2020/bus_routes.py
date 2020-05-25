@@ -1,7 +1,5 @@
-import heapq
-
-
 DEV = True
+
 sample_text = """3
 3 10
 3 7 2
@@ -10,6 +8,22 @@ sample_text = """3
 1 1
 1
 """
+
+samples = [(
+"""3 10
+3 7 2""", 6), (
+"""4 100
+11 10 5 50""", 99), (
+"""1 1
+1""", 1),
+]
+sample_inputs, sample_outputs = zip(*samples)
+
+sample_text  = str(len(samples))+'\n'+"\n".join(sample_inputs)
+if DEV:
+    print("expected output:\n")
+    print("\n".join("EXPECT Case {}: {}".format(i+1, o) for i, o in enumerate(sample_outputs)))
+    print()
 
 
 if DEV:
@@ -38,17 +52,16 @@ def try_day(end, freqs):
     start = end
     while freqs:
         cur = freqs.pop()
-        while start % cur != 0:
-            start -= 1
+        start -= start % cur
 
     return start
 
 
 def bus_route(n_days, freqs):
     start = try_day(n_days, freqs)
-    for end in reversed(range(n_days-max(freqs), n_days)):
+    # for end in reversed(range(n_days-max(freqs), n_days)):
 
-        start = max(start, try_day(end, freqs))
+    #     start = max(start, try_day(end, freqs))
 
     return start
 
