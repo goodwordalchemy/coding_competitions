@@ -114,7 +114,9 @@ def walk(w, h, l, u, r, d):
 
 
 
-def walk_fuck(w, h, l, u, r, d):
+def walk_alt(w, h, l, u, r, d):
+    """this was my original solution, but it TLEs for some reason which
+    I cannot fathom"""
     if u == 1 and d == h:
         return 0.0
     elif l == 1 and r == w:
