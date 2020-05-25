@@ -7,7 +7,7 @@
 - [ ] Candies
 
 # 2020B
-- [ ] Bus Routes
+- [x] Bus Routes
 - [ ] Wandering Robot
 
 ### 2019H
