@@ -8,7 +8,7 @@
 
 # 2020B
 - [x] Bus Routes
-- [ ] Wandering Robot
+- [x] Wandering Robot
 
 ### 2019H
 - [x] H-index
