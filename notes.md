@@ -10,6 +10,15 @@
 - [x] Bus Routes
 - [x] Wandering Robot
 
+## 2020A
+- [x] Workout (2nd set)
+- [x] Bundling
+
+* second set of workout required deep intuition about the problem itself.  Was not hard to program at all.  The intution was that you could binary search for the global answer, and use each guess to check that amount of sessions that would have to be inserted.
+* key thing with bundling was realizing that each prefix could contribute
+Pi // K to the total.  Basically greedy algorithm where you group and count
+as many as possible.
+
 ### 2019H
 - [x] H-index
 - [x] Diagonal Puzzle (3 hours with analysis in front of me)
