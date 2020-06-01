@@ -1,4 +1,4 @@
-DEBUG = False
+DEBUG = True
 test_data = """2
 5 4
 1 3 9 8 2
@@ -33,20 +33,19 @@ def parse_input():
     return cases
 
 
-def update(candies, idx, val):
-    candies[idx-1] = val
+def query_candies_slow(candies, queries):
+    def update(candies, idx, val):
+        candies[idx-1] = val
 
 
-def query(candies, start, end):
-    result = 0
-    for i, elt in enumerate(candies[start-1:end]):
-        parity = -1 if (i&1) else 1
-        result += (i+1)*parity*candies[start+i-1]
-    
-    return result
+    def query(candies, start, end):
+        result = 0
+        for i, elt in enumerate(candies[start-1:end]):
+            parity = -1 if (i&1) else 1
+            result += (i+1)*parity*candies[start+i-1]
 
+        return result
 
-def query_candies(candies, queries):
     result = 0
     for type_, a, b in queries:
         if type_ == 'U':
@@ -54,7 +53,35 @@ def query_candies(candies, queries):
         else:
             qr = query(candies, a, b)
             result += qr
-    
+
+    return result
+
+def query(prefix, start, end):
+    return prefix[end] - prefix[start-1]
+
+def update(prefix, candies, idx, val):
+    idx -= 1
+    N = len(candies)
+
+    candies[idx] = val
+    for i in range(idx, N):
+        parity = 1 if i&1 else -1
+        prefix[i+1] = prefix[i] + parity*(i+1)*candies[i]
+
+def query_candies(candies, queries):
+    prefix = [0]
+    for i, c in enumerate(candies):
+        parity = 1 if i&1 else -1
+        prefix.append(prefix[-1] + parity*(i+1)*c)
+
+    result = 0
+    for type_, a, b in queries:
+        if type_ == 'U':
+            update(prefix, candies, a, b)
+        else:
+            qr = query(prefix, a, b)
+            print("query={} {} {}, result={}".format(type_, a, b, qr))
+            result += qr
 
     return result
 
