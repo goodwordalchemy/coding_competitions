@@ -3,8 +3,10 @@
 ## Solving Questions I Missed
 
 ### 2020C
-- [ ] Perfect Subarray
-- [ ] Candies
+- [ ] Perfect Subarray (part 2)
+- [ ] Candies (part 2)
+
+* "Candies I" was just a take on summing across a matrix and prefix sums.
 
 # 2020B
 - [x] Bus Routes

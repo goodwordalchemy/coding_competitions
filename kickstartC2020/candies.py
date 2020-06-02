@@ -58,8 +58,8 @@ def query_candies_slow(candies, queries):
 
 def query(prefix, m_prefix, start, end):
     result = m_prefix[end]
-    result -= (end-start+1)*(prefix[end] - prefix[start-1])
     result -= m_prefix[start-1]
+    result -= (start-1)*(prefix[end] - prefix[start-1])
 
     parity = 1 if (start-1)&1 else -1
     result *= parity
@@ -79,15 +79,13 @@ def get_prefix_arrays(candies):
 def query_candies(candies, queries):
     prefix, m_prefix = get_prefix_arrays(candies)
 
-
     result = 0
     for type_, a, b in queries:
         if type_ == 'U':
             candies[a-1] = b
             prefix, m_prefix = get_prefix_arrays(candies)
         else:
-            qr = query(prefix, a, b)
-            print("query={} {} {}, result={}".format(type_, a, b, qr))
+            qr = query(prefix, m_prefix, a, b)
             result += qr
 
     return result
