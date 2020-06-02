@@ -1,5 +1,5 @@
-DEBUG = True
-test_data = """2
+DEV = True
+sample_text = """2
 5 4
 1 3 9 8 2
 Q 2 4
@@ -12,10 +12,86 @@ U 1 2
 U 1 7
 Q 1 2"""
 
-if DEBUG:
+MAX = 20000
+samples = [(
+"""5 4
+1 3 9 8 2
+Q 2 4
+Q 5 5
+U 2 10
+Q 1 2""", -8
+), (
+"""3 3
+4 5 5
+U 1 2
+U 1 7
+Q 1 2""", -3
+), (
+"""1 3
+1
+Q 1 1
+U 1 3
+Q 1 1""", 4
+), (
+"""2 4
+1 2
+Q 1 1
+U 1 3
+U 2 3
+Q 1 1""", 4
+), (
+"""10 3
+1 2 3 4 5 6 7 8 9 10
+Q 1 4
+U 5 8
+Q 4 9""", -46
+), (
+"""{} 8
+{}
+Q 1 500
+U 488 4
+Q 400 599
+Q 1 1000
+U 1 1000
+U 1000 1
+U 56 56
+U 9999 18""".format(20000, " ".join(map(str, range(20000)))), -492183
+), (
+"""{} {}
+{}
+Q 1 500
+U 488 4
+Q 1 1000
+U 1 1000
+Q 400 599
+U 1000 1
+Q 400 20000
+U 56 56
+Q 1 1000
+U 9999 18
+Q 1 1000
+{}""".format(
+    MAX,
+    MAX,
+    " ".join(map(str, range(MAX))),
+    "\n".join("Q {} {}".format(i%100+1, MAX) for i in range(MAX-11)))[:-1],
+11096018
+)
+]
+
+sample_inputs, sample_outputs = zip(*samples)
+
+sample_text  = str(len(samples))+'\n'+"\n".join(sample_inputs)
+if DEV:
+    print("expected output:\n")
+    print("\n".join("EXPECT Case {}: {}".format(i+1, o) for i, o in enumerate(sample_outputs)))
+    print()
+
+
+if DEV:
     from unittest.mock import MagicMock
 
-    input = MagicMock(side_effect=test_data.split("\n"))
+    input = MagicMock(side_effect=sample_text.split("\n"))
 
 def parse_input():
     cases = []
@@ -35,7 +111,6 @@ def parse_input():
 
 class SegmentTree:
     def __init__(self, values):
-
         self.N = len(values)
         self.tree = [0]*self.N*4
         self.tree[self.N+1:2*self.N+1] = values
@@ -89,6 +164,15 @@ def query(s_tree, m_tree, start, end):
     return result
 
 def query_candies(candies, queries):
+    n_updates = 0
+    for type_, _, __ in queries:
+        if type_ == 'U':
+            n_updates += 1
+    if n_updates == len(queries):
+        return 0
+    elif n_updates <= 6:
+        return query_candies_prefix(candies, queries)
+
     s_tree, m_tree = get_segment_trees(candies)
 
     result = 0
@@ -104,47 +188,54 @@ def query_candies(candies, queries):
 
     return result
 
-# def query(prefix, m_prefix, start, end):
-#     result = m_prefix[end]
-#     result -= m_prefix[start-1]
-#     result -= (start-1)*(prefix[end] - prefix[start-1])
 
-#     parity = 1 if (start-1)&1 else -1
-#     result *= parity
+def query_candies_prefix(candies, queries):
+    def query(prefix, m_prefix, start, end):
+        result = m_prefix[end]
+        result -= m_prefix[start-1]
+        result -= (start-1)*(prefix[end] - prefix[start-1])
 
-#     return result
+        parity = 1 if (start-1)&1 else -1
+        result *= parity
 
-# def get_prefix_arrays(candies):
-#     prefix = [0]
-#     m_prefix = [0]
-#     for i, c in enumerate(candies):
-#         parity = 1 if i&1 else -1
-#         prefix.append(prefix[-1] + parity*c)
-#         m_prefix.append(m_prefix[-1] + parity*(i+1)*c)
+        return result
 
-#     return prefix, m_prefix
+    def get_prefix_arrays(candies):
+        prefix = [0]
+        m_prefix = [0]
+        for i, c in enumerate(candies):
+            parity = 1 if i&1 else -1
+            prefix.append(prefix[-1] + parity*c)
+            m_prefix.append(m_prefix[-1] + parity*(i+1)*c)
 
-# def query_candies(candies, queries):
-#     prefix, m_prefix = get_prefix_arrays(candies)
+        return prefix, m_prefix
+    prefix, m_prefix = get_prefix_arrays(candies)
 
-#     result = 0
-#     for type_, a, b in queries:
-#         if type_ == 'U':
-#             candies[a-1] = b
-#             prefix, m_prefix = get_prefix_arrays(candies)
-#         else:
-#             qr = query(prefix, m_prefix, a, b)
-#             result += qr
+    result = 0
+    for type_, a, b in queries:
+        if type_ == 'U':
+            candies[a-1] = b
+            prefix, m_prefix = get_prefix_arrays(candies)
+        else:
+            qr = query(prefix, m_prefix, a, b)
+            result += qr
 
-#     return result
+    return result
 
 def main():
     cases = parse_input()
     for i, (candies, queries) in enumerate(cases):
         print("Case #{}: {}".format(i+1, query_candies(candies, queries)))
 
+def debug():
+    cases = parse_input()
+    for i, (candies, queries) in enumerate(cases):
+        print("Case #{}: {}".format(i+1, query_candies(candies, queries)))
+        print("DEBUG: Case #{}: {}".format(i+1, query_candies_prefix(candies, queries)))
+        print()
 
 
 if __name__ == '__main__':
     main()
+    # debug()
 
