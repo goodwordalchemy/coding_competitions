@@ -33,62 +33,111 @@ def parse_input():
     return cases
 
 
-def query_candies_slow(candies, queries):
-    def update(candies, idx, val):
-        candies[idx-1] = val
+class SegmentTree:
+    def __init__(self, values):
 
+        self.N = len(values)
+        self.tree = [0]*self.N*4
+        self.tree[self.N+1:2*self.N+1] = values
+        for i in reversed(range(1, self.N+1)):
+            self.tree[i] = self.tree[i<<1] + self.tree[i<<1|1]
 
-    def query(candies, start, end):
+    def update(self, idx, val):
+        idx += self.N
+        self.tree[idx] = val
+        while idx > 1:
+            self.tree[idx>>1] = self.tree[idx] + self.tree[idx^1]
+            idx >>= 1
+
+    def query(self, l, r):
         result = 0
-        for i, elt in enumerate(candies[start-1:end]):
-            parity = -1 if (i&1) else 1
-            result += (i+1)*parity*candies[start+i-1]
+        l += self.N
+        r += self.N
+        while l < r:
+            if l&1:
+                result += self.tree[l]
+                l += 1
+            if r&1:
+               r -= 1
+               result += self.tree[r]
+
+            l >>= 1
+            r >>= 1
 
         return result
 
-    result = 0
-    for type_, a, b in queries:
-        if type_ == 'U':
-            update(candies, a, b)
-        else:
-            qr = query(candies, a, b)
-            result += qr
+def get_segment_trees(candies):
+    s, m = [], []
+    for i, c in enumerate(candies):
+        parity = -1 if i&1 else 1
+        s.append(parity*c)
+        m.append(parity*(i+1)*c)
 
-    return result
+    s_tree = SegmentTree(s)
+    print(s_tree.tree)
+    import ipdb; ipdb.set_trace()
+    m_tree = SegmentTree(m)
 
-def query(prefix, m_prefix, start, end):
-    result = m_prefix[end]
-    result -= m_prefix[start-1]
-    result -= (start-1)*(prefix[end] - prefix[start-1])
+    return s_tree, m_tree
 
-    parity = 1 if (start-1)&1 else -1
+def query(s_tree, m_tree, start, end):
+    result = m_tree.query(1, end+1)
+    result -= m_tree.query(1, start)
+    result -= (start-1)*(s_tree.query(1, end+1) - s_tree.query(1, start))
+
+    parity = -1 if (start-1)&1 else 1
     result *= parity
 
     return result
 
-def get_prefix_arrays(candies):
-    prefix = [0]
-    m_prefix = [0]
-    for i, c in enumerate(candies):
-        parity = 1 if i&1 else -1
-        prefix.append(prefix[-1] + parity*c)
-        m_prefix.append(m_prefix[-1] + parity*(i+1)*c)
-
-    return prefix, m_prefix
-
 def query_candies(candies, queries):
-    prefix, m_prefix = get_prefix_arrays(candies)
+    s_tree, m_tree = get_segment_trees(candies)
 
     result = 0
     for type_, a, b in queries:
         if type_ == 'U':
-            candies[a-1] = b
-            prefix, m_prefix = get_prefix_arrays(candies)
+            s_tree.update(a, b)
+            m_tree.update(a, b)
         else:
-            qr = query(prefix, m_prefix, a, b)
+            qr = query(s_tree, m_tree, a, b+1)
+            print(qr)
             result += qr
 
     return result
+
+# def query(prefix, m_prefix, start, end):
+#     result = m_prefix[end]
+#     result -= m_prefix[start-1]
+#     result -= (start-1)*(prefix[end] - prefix[start-1])
+
+#     parity = 1 if (start-1)&1 else -1
+#     result *= parity
+
+#     return result
+
+# def get_prefix_arrays(candies):
+#     prefix = [0]
+#     m_prefix = [0]
+#     for i, c in enumerate(candies):
+#         parity = 1 if i&1 else -1
+#         prefix.append(prefix[-1] + parity*c)
+#         m_prefix.append(m_prefix[-1] + parity*(i+1)*c)
+
+#     return prefix, m_prefix
+
+# def query_candies(candies, queries):
+#     prefix, m_prefix = get_prefix_arrays(candies)
+
+#     result = 0
+#     for type_, a, b in queries:
+#         if type_ == 'U':
+#             candies[a-1] = b
+#             prefix, m_prefix = get_prefix_arrays(candies)
+#         else:
+#             qr = query(prefix, m_prefix, a, b)
+#             result += qr
+
+#     return result
 
 def main():
     cases = parse_input()
