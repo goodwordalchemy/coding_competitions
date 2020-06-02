@@ -74,8 +74,6 @@ def get_segment_trees(candies):
         m.append(parity*(i+1)*c)
 
     s_tree = SegmentTree(s)
-    print(s_tree.tree)
-    import ipdb; ipdb.set_trace()
     m_tree = SegmentTree(m)
 
     return s_tree, m_tree
@@ -96,11 +94,12 @@ def query_candies(candies, queries):
     result = 0
     for type_, a, b in queries:
         if type_ == 'U':
-            s_tree.update(a, b)
-            m_tree.update(a, b)
+            parity = -1 if (a-1)&1 else 1
+
+            s_tree.update(a, parity*b)
+            m_tree.update(a, a*parity*b)
         else:
-            qr = query(s_tree, m_tree, a, b+1)
-            print(qr)
+            qr = query(s_tree, m_tree, a, b)
             result += qr
 
     return result
