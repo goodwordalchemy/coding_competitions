@@ -47,7 +47,7 @@ def workout(k, sessions):
 
 def main():
     for i, test_case in enumerate(parse_input()):
-        print("Case #{}: {}".format(i+1, workout(*test_case))
+        print("Case #{}: {}".format(i+1, workout(*test_case)))
 
 if __name__ == '__main__':
     main()
