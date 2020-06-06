@@ -7,7 +7,7 @@ samples = [(
 ), (
 """11 11 11
 1 2 3 4 5 6 7 8 9 10 11
-1 2 3 4 5 6 7 8 9 10 11""", 9
+1 2 3 4 5 6 7 8 9 10 11""", 0
 ), (
 """1000 6 1
 4 8 15 16 23 42
@@ -45,13 +45,15 @@ def parse_input():
 
 def book_reading(N, pages, readers):
     pages = set(pages)
+
+    cache = [0]*N
+    for i in range(1, N+1):
+        for j in range(i, N+1, i):
+            cache[i-1] += j not in pages
+
     result = 0
     for r in readers:
-        for m in range(r, N+1, r):
-            if m in pages:
-                continue
-            result += 1
-            # print("reader={}, just read = {}, n read={},  pages={}".format(r, m, result, pages))
+        result += cache[r-1]
 
     return result
 
