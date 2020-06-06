@@ -4,9 +4,10 @@
 
 ### 2020C
 - [ ] Perfect Subarray (part 2)
-- [ ] Candies (part 2)
+- [x] Candies (part 2)
 
 * "Candies I" was just a take on summing across a matrix and prefix sums.
+* "Candies II" was just awful to debug.  I kept getting TLE even for the first test set.  Then, Ii realized that prefix sum queries are constant time, so they are much faster when you have a small amount of updates.  I knew my prefix sum worked on the first test set, so I tried using prefix sum when the number of queries is small and segment tree for when it is larger, and it passed.
 
 # 2020B
 - [x] Bus Routes
