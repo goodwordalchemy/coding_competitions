@@ -2,7 +2,7 @@ from fractions import Fraction
 
 DEV = True
 
-sample_text = """4
+sample_text = """5
 1 3
 FFT 3
 1 3
@@ -13,6 +13,10 @@ FTFTFT 4
 2 2
 FF 1
 TT 1
+3 120
+FFTFFFTFFFTTTTTTTFTFFFFFFTTTFTFFFTFTFFTTFTFFTFFTTTFTFTFFTFTFTTFFFFTFTFFFFTTTFTTFTTTTFFFTTFFFFFTTFFTFFTFFTTTFFFFTTFFTFTTF 55
+FFFTFFTTFFFFTFTFFTFFFTTTTTTFFFTTTFTTTTFFTFTTTFTTFFTTTFTFFFFTFFTTFFTTFTTFFTFTFFTFTTFTFTFFTTTFFTFTFTTFFTFTFTFTTFFTFFFTFTFT 62
+FFFTFTTFFFFFTFTFTTTTTTFFTTFTFFFTFFTTTTTTFFFTTTFFFTTFTFFFFFFTFTTFFTFTTTFTTTTFTTFFFFTFFTTFTFFTTTTTTFTFFFFFTTFFTFTFTFFTTTTT 64
 """
 
 
@@ -39,18 +43,20 @@ def parse_input():
 
 
 def hacked_exam(N, Q, students):
-    question_scores = [[0,0] for _ in range(Q)] # T, F
+    question_scores = [[0,0,0,0] for _ in range(Q)] # T, F
     print()
     print(N, Q, students)
 
     for answers, score in students:
         for i in range(Q):
             if answers[i] == "T":
-                question_scores[i][0] += Fraction(score, Q)
-                question_scores[i][1] += Fraction(Q-score, Q)
+                question_scores[i][0] += score
+                question_scores[i][1] += Q-score
+                question_scores[i][2] += 1
             else:
-                question_scores[i][0] += Fraction(Q-score, Q)
-                question_scores[i][1] += Fraction(score, Q)
+                question_scores[i][0] += Q-score
+                question_scores[i][1] += score
+                question_scores[i][3] += 1
 
     print("Trues: {}".format([x[0] for x in question_scores]))
     print("Falses: {}".format([x[1] for x in question_scores]))
@@ -58,15 +64,15 @@ def hacked_exam(N, Q, students):
     my_score = Fraction(0)
 
     for i in range(Q):
-        T, F = question_scores[i]
+        T, F, Tc, Fc = question_scores[i]
         if T > F:
             my_answers.append("T")
-            my_score += T
+            my_score += Fraction(1, 2) + (Fraction(T,  N) - Fraction(1, 2))
         else:
             my_answers.append("F")
-            my_score += F
+            my_score += Fraction(1, 2) +  (Fraction(F , N) - Fraction(1, 2))
 
-    my_score /= N
+    my_score /= Q
 
 
     ans_str = "".join(my_answers)

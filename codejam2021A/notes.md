@@ -23,3 +23,5 @@ For any row, col, the contribution of this person to this question is some kind 
 Actually, an even simpler model would be to just say that each person contributes the probability that they guessed right as a vote to True or false for that answer.  
 
 then our expected score for that question is the sum of those probabilites / N people.
+
+I am outputting the right answer, (I think), but my score is wrong.  I think I may be calculating the 
