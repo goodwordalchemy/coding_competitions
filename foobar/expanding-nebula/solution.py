@@ -13,25 +13,45 @@ def int2row(i, row_length):
 
 def _get_top_to_bottom_maps_for_each_row(C):
     row_length = len(C[0])
-    result = {}
+    result = {1: defaultdict(list)}
 
     n_possible_rows = 2**(row_length+1)
     all_row_configs = [int2row(i, row_length+1) for i in range(n_possible_rows)]
 
-    for i, row in enumerate(C):
+    
+    top_row_precursor = int2row(0, row_length+1)
+    row = C[0]
+    for r1 in all_row_configs:
+        for r2 in all_row_configs:
+            for c in range(row_length):
+                s = r1[c] + r1[c+1] + r2[c] + r2[c+1]
+                if (s == 1 and not row[c]) or (s != 1 and row[c]):
+                    break
+            else:
+                result[1][(top_row_precursor, r1)].append((r1, r2))
+
+
+    for i in range(1, len(C)):
+        row = C[i]
         result[i+1] = defaultdict(list) 
 
         for r1 in all_row_configs:
             for r2 in all_row_configs:
-
                 # check if bottom (r1, r2) is a valid precursor
                 for c in range(row_length):
                     s = r1[c] + r1[c+1] + r2[c] + r2[c+1]
-                    if (s == 1 and row[c]) or (s != 1 and not row[c]):
-                        tops = [(top, r1) for top in all_row_configs]
-                        for t in tops:
-                            result[i+1][t].append((r1, r2))
-    print(result)
+                    if (s == 1 and not row[c]) or (s != 1 and row[c]):
+                        break
+                else:
+                    tops = [(top, r1) for top in all_row_configs]
+                    for t in tops:
+                        result[i+1][t].append((r1, r2))
+
+    # for t, bs in result[1].items():
+    #     print(t)
+    #     for b in bs:
+    #         print("\t{}".format(b[1]))
+    #     print()
     return result
 
 
@@ -56,7 +76,7 @@ def aggregate_over_precursors(C):
         B_r_A[r] = Counter()
         for b, a in B_r_A[r-1].items(): 
             for b_prime in T_Cr_Bs[r][b]:
-                B_r_A[r][b_prime] += a + 1
+                B_r_A[r][b_prime] += a 
 
     # return final aggregate
     return sum(B_r_A[len(C)].values())
@@ -76,25 +96,17 @@ def solution(g):
 
 test_cases = [
     (
-        ([[False]],),
-       12
+        ([[True, False, True], [False, True, False], [True, False, True]],),
+        4,
     ),
-    # (
-    #     ([[True]],),
-    #    4 
-    # ),
-    # (
-    #     ([[True, False, True], [False, True, False], [True, False, True]],),
-    #     4,
-    # ),
-	# (
-    #     ([[True, False, True, False, False, True, True, True], [True, False, True, False, False, False, True, False], [True, True, True, False, False, False, True, False], [True, False, True, False, False, False, True, False], [True, False, True, False, False, True, True, True]],),
-    #     254
-    # ),
-	# (
-    #     ([[True, True, False, True, False, True, False, True, True, False], [True, True, False, False, False, False, True, True, True, False], [True, True, False, False, False, False, False, False, False, True], [False, True, False, False, False, False, True, True, False, False]],),
-    #     11567
-	# ), 
+	(
+        ([[True, False, True, False, False, True, True, True], [True, False, True, False, False, False, True, False], [True, True, True, False, False, False, True, False], [True, False, True, False, False, False, True, False], [True, False, True, False, False, True, True, True]],),
+        254
+    ),
+	(
+        ([[True, True, False, True, False, True, False, True, True, False], [True, True, False, False, False, False, True, True, True, False], [True, True, False, False, False, False, False, False, False, True], [False, True, False, False, False, False, True, True, False, False]],),
+        11567
+	), 
 ]
 
 for args, ans in test_cases:
