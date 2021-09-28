@@ -1,0 +1,7 @@
+In [13]: key = "dbgoldberg01"
+
+In [14]: for i, c in enumerate(data):
+    ...:     print(chr(c ^ ord(key[i % len(key)])), end="")
+    ...: 
+{'success' : 'great', 'colleague' : 'esteemed', 'efforts' : 'incredible', 'achievement' : 'unlocked', 'rabbits' : 'safe', 'foo' : 'win!'}
+In [15]: 
