@@ -1,4 +1,4 @@
-from bisect import insort
+import math
 
 DEV = True
 
@@ -34,59 +34,91 @@ def parse_input():
 			rides.append((h, s, e))
 		yield (D, K, rides)
 
+class SegmentTree(object):
+	def __init__(self, N,
+				 query_fn=lambda x, y: x + y,
+				 update_fn=lambda x, y: y,
+				 default_val=0):
 
-class SegmentTree:
-	def __init__(self, values, zero_val=0, comb=lambda a, b: a + b):
-		"""
-		values: List[T] an array of values to query
-		comb: Function[[T, T], U]
-		"""
-		import math
-		intended_length = 2**(math.ceil(math.log2(len(values)))+1)
-		for _ in range(intended_length - len(values) - 1):
-			values.append(zero_val)
+		self.original_N = N
+		intended_length = 2**(math.ceil(math.log2(N))+1)
+		self.N = intended_length
+		self.H = (self.N-1).bit_length()
+		self.query_fn = query_fn
+		self.update_fn = update_fn
+		self.default_val = default_val
+		self.tree = [default_val] * (2 * self.N)
+		self.lazy = [None] * self.N
 
+	def __apply(self, x, val):
+		self.tree[x] = self.update_fn(self.tree[x], val)
+		if x < self.N:
+			self.lazy[x] = self.update_fn(self.lazy[x], val)
 
-		self.zero_val = zero_val
-		self.N = len(values)
-		self.tree = [self.zero_val]*self.N*4
-		self.tree[self.N+1:2*self.N+1] = values
-		self.comb = comb
-		for i in reversed(range(1, self.N+1)):
-			self.tree[i] = self.comb(self.tree[i<<1], self.tree[i<<1|1])
+	def bulk_update(self, I, hs):
+		for i, h in enumerate(hs):
+			self.update(I+i, I+i, h)
 
-	def update(self, idx, val):
-		idx += self.N
-		self.tree[idx] = val
-		while idx > 1:
-			self.tree[idx>>1] = self.comb(self.tree[idx], self.tree[idx^1])
-			idx >>= 1
+	def update(self, L, R, h):
+		def pull(x):
+			while x > 1:
+				x //= 2
+				self.tree[x] = self.query_fn(self.tree[x*2], self.tree[x*2 + 1])
+				if self.lazy[x] is not None:
+					self.tree[x] = self.update_fn(self.tree[x], self.lazy[x])
+		L += self.N
+		R += self.N
+		L0, R0 = L, R
+		while L <= R:
+			if L & 1:
+				self.__apply(L, h)
+				L += 1
+			if R & 1 == 0:
+				self.__apply(R, h)
+				R -= 1
+			L //= 2
+			R //= 2
+		pull(L0)
+		pull(R0)
 
-	def query(self, l, r):
-		result = self.zero_val 
-		l += self.N
-		r += self.N
-		while l < r:
-			if l&1:
-				result = self.comb(result, self.tree[l])
-				l += 1
-			if r&1:
-			   r -= 1
-			   result = self.comb(result, self.tree[r])
+	def query(self, L, R):
+		def push(x):
+			n = 2**self.H
+			while n != 1:
+				y = x // n
+				if self.lazy[y] is not None:
+					self.__apply(y*2, self.lazy[y])
+					self.__apply(y*2 + 1, self.lazy[y])
+					self.lazy[y] = None
+				n //= 2
 
-			l >>= 1
-			r >>= 1
+		result = self.default_val
+		if L > R:
+			return result
 
+		L += self.N
+		R += self.N
+		push(L)
+		push(R)
+		while L <= R:
+			if L & 1:
+				result = self.query_fn(result, self.tree[L])
+				L += 1
+			if R & 1 == 0:
+				result = self.query_fn(result, self.tree[R])
+				R -= 1
+			L //= 2
+			R //= 2
 		return result
 
 	def idx_at_or_below(self, k):
 		v = 1
 		tl = 0
-		tr = self.N
+		tr = self.N-1
 
 		while tl != tr:
 			if k > self.tree[v]:
-				return -1
+				return self.original_N 
 			tm = (tl + tr) // 2
 			if self.tree[v*2] > k:
 				v *= 2
@@ -96,8 +128,13 @@ class SegmentTree:
 				v = v * 2 + 1
 				tl = tm + 1
 
-		return tl
-			
+		return tl - 1
+	
+	def data(self):
+		showList = []
+		for i in xrange(self.N):
+			showList.append(self.query(i, i))
+		return showList
 
 def test_segment_tree():
 	arrays = [
@@ -107,68 +144,41 @@ def test_segment_tree():
 	]
 
 	for a in arrays:
-		tree = SegmentTree(a)
+		tree = SegmentTree(len(a))
+		tree.bulk_update(0, a)
 		idx = tree.idx_at_or_below(-1000)
-		assert idx == 0, idx
-
-		idx = tree.idx_at_or_below(1)
-		assert idx == 1, idx
-
-		idx = tree.idx_at_or_below(2)
-		assert idx == 1, idx
-
-		idx = tree.idx_at_or_below(3)
-		assert idx == 2, idx
-
-		idx = tree.idx_at_or_below(5)
-		assert idx == 2, idx
-
-		idx = tree.idx_at_or_below(6)
-		assert idx == 3, idx
-
-		idx = tree.idx_at_or_below(1000)
 		assert idx == -1, idx
 
+		idx = tree.idx_at_or_below(1)
+		assert idx == 0, idx
+
+		idx = tree.idx_at_or_below(2)
+		assert idx == 0, idx
+
+		idx = tree.idx_at_or_below(3)
+		assert idx == 1, idx
+
+		idx = tree.idx_at_or_below(5)
+		assert idx == 1, idx
+
+		idx = tree.idx_at_or_below(6)
+		assert idx == 2, idx
+
+		idx = tree.idx_at_or_below(1000)
+		assert idx == len(a), idx
+
+		s = tree.query(2, 2)
+		assert s == 3, s
+
+		s = tree.query(0, 1)
+		assert s == 3, s
+
 		s = tree.query(1, 3)
-		assert s == 3
+		assert s == 9, s
 
-		s = tree.query(1, 4)
-		assert s == 6
-
-		s = tree.query(2, 4)
-		assert s == 5
 
 if DEV:
 	test_segment_tree()
-
-class BIT(object):	# 0-indexed.
-	def __init__(self, n):
-		self.__bit = [0]*(n+1)	# Extra one for dummy node.
-
-	def add(self, i, val):
-		i += 1	# Extra one for dummy node.
-		while i < len(self.__bit):
-			self.__bit[i] += val
-			i += (i & -i)
-
-	def query(self, i):
-		i += 1	# Extra one for dummy node.
-		ret = 0
-		while i > 0:
-			ret += self.__bit[i]
-			i -= (i & -i)
-		return ret
-
-	def kth_element(self, k):
-		floor_log2_n = (len(self.__bit)-1).bit_length()-1
-		pow_i = 2**floor_log2_n
-		total = pos = 0  # 1-indexed
-		for _ in reversed(range(floor_log2_n+1)):	# O(logN)
-			if pos+pow_i < len(self.__bit) and total+self.__bit[pos+pow_i] < k:  # find max pos s.t. total < k
-				total += self.__bit[pos+pow_i]
-				pos += pow_i
-			pow_i >>= 1
-		return (pos+1)-1  # 0-indexed, return min pos s.t. total >= k if pos exists else n
 
 def solution(D, K, rides):
 	line_sweep = []
@@ -183,23 +193,22 @@ def solution(D, K, rides):
 
 	idx_to_rank = {i: rank for rank, (_, i) in enumerate(hs)}
 
-	enabled = BIT(len(rides))
-	scores = BIT(len(rides))
-	# enabled = SegmentTree([0]*len(rides))
-	# scores = SegmentTree([0]*len(rides))
+	enabled = SegmentTree(len(rides))
+	scores = SegmentTree(len(rides))
 
 	result = 0
 	for _, type_, h, i in line_sweep:
 		if type_ == 1:
-			enabled.add(idx_to_rank[i], 1)
-			scores.add(idx_to_rank[i], h)
-			idx = enabled.kth_element(K)
-			idx = min(idx, len(rides) - 1)
-		   
-			result = max(result, scores.query(idx))
+			enabled.update(idx_to_rank[i], idx_to_rank[i], 1)
+			scores.update(idx_to_rank[i], idx_to_rank[i], h)
+			idx = enabled.idx_at_or_below(K)
+			if idx == -1:
+				idx = len(rides) 
+			
+			result = max(result, scores.query(0, idx))
 		else:
-			enabled.add(idx_to_rank[i], -1)
-			scores.add(idx_to_rank[i], -h)
+			enabled.update(idx_to_rank[i], idx_to_rank[i], 0)
+			scores.update(idx_to_rank[i], idx_to_rank[i], 0)
 
 	return result
 
