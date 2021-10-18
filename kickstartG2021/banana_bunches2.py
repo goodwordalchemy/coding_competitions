@@ -112,20 +112,15 @@ def solution(K, B):
                     _debug("yo", i, j, x, y)
                     result = min(result, y - i + 1  - (x - j + 1))
                 while j < x and cur_sum - diff <= K:
-                    if i == 1 and y == 44:
-                        print(i, j, x, y, cur_sum, diff, cur_sum-diff)
                     if B[x] == 0 and B[j] == 0:
                         break
                     j += 1
                     diff = prefix[x+1] - prefix[j]
                     if cur_sum - diff == K:
-                        print(cur_sum, diff, cur_sum - diff, prefix[y+1]-prefix[x+1] + prefix[j]-prefix[i])
-                        print("this", i, j, x, y, y - i + 1  - (x - j + 1))
+                        _debug("this", i, j, x, y, y - i + 1  - (x - j + 1))
                         result = min(result, y - i + 1  - (x - j + 1))
                     else:
                         _debug("else", i, j, x, y)
-                    if i == 1 and y == 44:
-                        print(i, j, x, y, cur_sum, diff, cur_sum-diff)
 
     return result if result < float('inf') else -1
 

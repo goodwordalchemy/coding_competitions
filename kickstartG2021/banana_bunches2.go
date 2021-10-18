@@ -37,7 +37,6 @@ func solution(N int, K int, B []int) string {
 		for y := i+1; y < N; y++ {
 			curSum = prefix[y+1] - prefix[i]
 			if curSum == K {
-                fmt.Println("hey3")
 				result = min(result, y - i + 1)
 			}
             if curSum < K {
@@ -47,13 +46,8 @@ func solution(N int, K int, B []int) string {
             for x := j; x < y; x++ {
 				diff = prefix[x+1] - prefix[j]
 				if curSum - diff == K {
-                    fmt.Println("hey")
 					result = min(result, y - i + 1  - (x - j + 1))
 				}
-                if i == 1 && y == 44 {
-                    fmt.Println()
-                    fmt.Printf("i=%d, j=%d, x=%d, y=%d, curSum=%d, diff=%d, tot=%d, right?=%d\n",i, j, x, y, curSum, diff, curSum - diff, prefix[y+1]-prefix[x+1] + prefix[j]-prefix[i])
-                }
 				for (j < x) && (curSum - diff <= K) {
 					if B[x] == 0 && B[j] == 0 {
 						break
@@ -61,14 +55,8 @@ func solution(N int, K int, B []int) string {
 					j++
 					diff = prefix[x+1] - prefix[j]
 					if curSum - diff == K {
-                        fmt.Println("hey2")
 						result = min(result, y - i + 1  - (x - j + 1))
 					}
-                    if i == 1 && y == 44 {
-                        fmt.Printf("i=%d, j=%d, x=%d, y=%d, curSum=%d, diff=%d, tot=%d\n",i, j, x, y, curSum, diff, curSum - diff)
-                        fmt.Println(K-(curSum-diff))
-                        fmt.Println(curSum - diff <= K)
-                    }
 				}
 			}
 		}
@@ -107,13 +95,6 @@ func main() {
 			fmt.Printf("there was an error scanning: %v", err)
 		}
 
-        // //// DEBUG
-        // if i != 97 {
-        //     continue
-        // }
-        fmt.Println(N, K, B)
-        fmt.Println(B[26])
-        // ////
         result := solution(N, K, B)
         fmt.Printf("Case #%d: %s\n", i, result)
     }
