@@ -50,26 +50,26 @@ func combinations(n int, k int) [][]int {
     return result
 }
 
-func iPow(a, b int) int {
-  var result int = 1;
-
-  for 0 != b {
-    if 0 != (b & 1) {
-      result *= a;
-
-    }
-    b >>= 1;
-    a *= a;
-  }
-
-  return result;
-}
+// func iPow(a, b int) int {
+//   var result int = 1;
+//
+//   for 0 != b {
+//     if 0 != (b & 1) {
+//       result *= a;
+//
+//     }
+//     b >>= 1;
+//     a *= a;
+//   }
+//
+//   return result;
+// }
 
 func distance2(p1 []int, p2 []int) int {
     dx := p1[0] - p2[0]
     dy := p1[1] - p2[1]
 
-    return iPow(dx, 2) + iPow(dy, 2)
+    return dx*dx + dy*dy
 }
 
 func cosine(p1 []int, p2 []int) int {
@@ -83,6 +83,28 @@ func ccw(p1, p2, p3 []int) int {
     return result
 }
 
+type ByReferencePoint struct {
+    ReferencePoint []int
+    Points [][]int
+}
+
+func (b ByReferencePoint) Len()  int { return len(b.Points) }
+func (b ByReferencePoint) Swap(i, j int) {
+    b.Points[i], b.Points[j] = b.Points[j], b.Points[i]
+}
+func (b ByReferencePoint) Less(i, j int) bool {
+    ci := ccw(b.ReferencePoint, b.Points[i], b.Points[j])
+    cj := ccw(b.ReferencePoint, b.Points[j], b.Points[i])
+
+    if ci == cj {
+        di := distance2(b.Points[i], b.ReferencePoint)
+        dj := distance2(b.Points[j], b.ReferencePoint)
+        return di > dj
+    }
+
+    return ci > cj
+}
+
 func convexHull(points [][]int) [][]int {
     p := 0
 
@@ -94,19 +116,9 @@ func convexHull(points [][]int) [][]int {
         }
     }
 
-    referencePoint := points[p]
-    sort.Slice(points, func(i, j int) bool {
-        ci := ccw(referencePoint, points[i], points[j])
-        cj := ccw(referencePoint, points[j], points[i])
+    toSort := ByReferencePoint{ReferencePoint: points[p], Points:points}
+    sort.Sort(toSort)
 
-        if ci == cj {
-            di := distance2(points[i], referencePoint)
-            dj := distance2(points[j], referencePoint)
-            return di > dj
-        }
-
-        return ci > cj
-    })
 
 
     /*
@@ -114,63 +126,33 @@ func convexHull(points [][]int) [][]int {
     ones.  this means that the closer ones will get excluded from consideration.  If we didn't care about 
     colinear points, we could get rid of those
     */
-    i := 0
-    for i < len(points)-1 && ccw(referencePoint,  points[0], points[i]) == 0 {
-        i++
-    }
-    var tmp []int
-    l := 0
-    h := i-1
-    for l < h {
-        tmp = points[l]
-        points[l] = points[h]
-        points[h] = tmp
-        l++
-        h--
-    }
+    // i := 0
+    // for i < len(points)-1 && ccw(referencePoint,  points[0], points[i]) == 0 {
+    //     i++
+    // }
+    // var tmp []int
+    // l := 0
+    // h := i-1
+    // for l < h {
+    //     tmp = points[l]
+    //     points[l] = points[h]
+    //     points[h] = tmp
+    //     l++
+    //     h--
+    // }
+    return toSort.Points
 
-    stack := make([][]int, 0)
-
-    for _, p := range points {
-        for len(stack) > 1 && ccw(stack[len(stack)-2], stack[len(stack)-1], p) < 0 {
-            stack = stack[:len(stack)-1]
-        }
-        stack = append(stack, p)
-    }
-    return stack
+    // stack := make([][]int, 0)
+    //
+    // for _, p := range points {
+    //     for len(stack) > 1 && ccw(stack[len(stack)-2], stack[len(stack)-1], p) < 0 {
+    //         stack = stack[:len(stack)-1]
+    //     }
+    //     stack = append(stack, p)
+    // }
+    // return stack
 }
 
-// func pointInConvexPolygon(point []int, polygon [][]int) bool {
-//     x := float64(point[0])
-//     y := float64(point[1])
-//     n := len(polygon)
-//     inside := false
-//
-//     var p2x, p2y float64
-//     xints := 0.0
-//     p1x := float64(polygon[0][0])
-//     p1y := float64(polygon[0][1])
-//
-//     for i := 0; i <= n; i++ {
-//         p2x = float64(polygon[i % n][0])
-//         p2y = float64(polygon[i % n][1])
-//         if y > math.Min(p1y, p2y) {
-//             if y <= math.Max(p1y, p2y) {
-//                 if x <= math.Max(p1x, p2x) {
-//                     if p1y != p2y {
-//                         xints = (y-p1y) * (p2x-p1x) / (p2y-p1y) + p1x
-//                     }
-//                     if p1x == p2x || x < xints {
-//                         inside = !inside
-//                     }
-//                 }
-//             }
-//         }
-//         p1x, p1y = p2x, p2y
-//
-//     }
-//     return inside
-// }
 
 func rayIntersectsSegment(p, a, b []int) bool {
     if a[1] > b[1] {
@@ -246,84 +228,100 @@ func isOnSegment(point, a, b []int) bool {
     }
 }
 
-func pointOnPerimeter(point []int, polygon [][]int) bool {
-    for i := range polygon {
-        a := polygon[i]
-        b := polygon[(i+1) % len(polygon)]
-        if isOnSegment(point, a, b) {
-            return true
-        }
-    }
-    return false
+// func pointOnPerimeter(point []int, polygon [][]int) bool {
+//     for i := range polygon {
+//         a := polygon[i]
+//         b := polygon[(i+1) % len(polygon)]
+//         if isOnSegment(point, a, b) {
+//             return true
+//         }
+//     }
+//     return false
+// }
+//
+// func getPerimeter(polygon [][]int) float64 {
+//     result := 0.0
+//     for i := range polygon {
+//         a := polygon[i]
+//         b := polygon[(i+1) % len(polygon)]
+//         result += math.Sqrt(float64(distance2(a, b)))
+//     }
+//
+//     return result
+// }
+
+func getKey(n, k int) string {
+    key := fmt.Sprintf("%d-%d", n, k)
+    return key
 }
 
-func getPerimeter(polygon [][]int) float64 {
-    result := 0.0
-    for i := range polygon {
-        a := polygon[i]
-        b := polygon[(i+1) % len(polygon)]
-        result += math.Sqrt(float64(distance2(a, b)))
-    }
-
-    return result
-}
-
-func solution(points [][]int) string {
+func solution(points [][]int, cCache map[string][][]int) string {
+    // fmt.Println(len(points))
     blueStar := points[len(points)-1]
     points = points[:len(points)-1]
     n := len(points)
 
     result := math.Inf(1)
+    var hull, vertices [][]int
 
-    // for i := 0; i < n; i++ {
-    //     for j := i+1; j < n; j++ {
-    //         for k := j+1; k < n; k++ {
-    //             vertices := [][]int{points[i], points[j], points[k]}
-    //             hull := convexHull(vertices)
-    //
-    //             if !pointInConvexPolygon(blueStar, hull) {
-    //                 continue
-    //             } else if pointOnPerimeter(blueStar, hull) {
-    //                 continue
-    //             }
-    //             perimeter := getPerimeter(hull)
-    //             result = math.Min(perimeter, result)
-    //
-    //             for l := k+1; l < n; l++ {
-    //                 vertices = append(vertices, points[l])
-    //                 hull := convexHull(vertices)
-    //
-    //                 if !pointInConvexPolygon(blueStar, hull) {
-    //                     continue
-    //                 } else if pointOnPerimeter(blueStar, hull) {
-    //                     continue
-    //                 }
-    //                 perimeter := getPerimeter(hull)
-    //                 result = math.Min(perimeter, result)
-    //
-    //                 vertices = vertices[:len(vertices)-1]
-    //             }
-    //         }
-    //     }
-    // }
-    //
+
     for k := 3; k < 5; k++ {
-        combos := combinations(n, k)
+        // fmt.Println("start combs")
+        combos, ok := cCache[getKey(n, k)]
+        if !ok {
+            combos = combinations(n, k)
+            cCache[getKey(n, k)] = combos
+        }
+        // combos := combinations(n, k)
+        // fmt.Println("end combs", len(combos))
+        // fmt.Println("start loop")
         for _, combo := range combos {
-            vertices := make([][]int, 0)
-            for _, idx := range combo {
-                vertices = append(vertices, points[idx])
+            vertices = make([][]int, len(combo))
+            xLeft, xRight, yUp, yDown := 0, 0, 0, 0
+            for i, idx := range combo {
+                vertices[i] = points[idx]
+                if vertices[i][0] < blueStar[0] {
+                    xLeft += 1
+                }
+                if vertices[i][0] > blueStar[0] {
+                    xRight += 1
+                }
+                if vertices[i][1] > blueStar[1] {
+                    yUp += 1
+                }
+                if vertices[i][1] < blueStar[1] {
+                    yDown += 1
+                }
             }
-            hull := convexHull(vertices)
+            if xLeft  == 0 || xRight == 0 || yUp == 0 || yDown == 0 {
+                continue
+            }
+            hull = convexHull(vertices)
+            perimeter := 0.0
+            onPerimeter := false
+            for i := range hull {
+                a := hull[i]
+                b := hull[(i+1) % len(hull)]
+                perimeter += math.Sqrt(float64(distance2(a, b)))
+                if perimeter > result {
+                    break
+                }
+                if isOnSegment(blueStar, a, b) {
+                    onPerimeter = true
+                    break
+                }
+            }
+            if onPerimeter {
+                continue
+            }
 
             if !pointInConvexPolygon(blueStar, hull) {
                 continue
-            } else if pointOnPerimeter(blueStar, hull) {
-                continue
             }
-            perimeter := getPerimeter(hull)
+
             result = math.Min(perimeter, result)
         }
+        // fmt.Println("end loop")
     }
 
     if result ==  math.Inf(1) {
@@ -346,6 +344,7 @@ func solution(points [][]int) string {
 func main() {
     in := bufio.NewReader(os.Stdin)
 
+	cCache := make(map[string][][]int)
     var T, N, X, Y int
     fmt.Fscan(in, &T)
     for i := 1; i <= T; i++ {
@@ -356,7 +355,7 @@ func main() {
             points = append(points, []int{X, Y})
         }
 
-        result := solution(points)
+        result := solution(points, cCache)
         fmt.Printf("Case #%d: %s\n", i, result)
     }
 }
