@@ -2,9 +2,9 @@
 | ------------- | --------------------- | ------------  | --------------------  |
 | G2021         | Dogs and Cats         | [x] [x]       |                       |
 |               | Staying Hydrated      | [x] [x]       | Line Sweep            |
-|               | Banana Bunches        | [x] [x] [x]   | Pick's Theorem        |
-|               | Simple Polygon        | [] []         |                       |
-| F2021         | Trash Bins            | [] []         |                       |
-|               | Festival              | [] []         |                       |
-|               | Star Trappers         | [] [] []      |                       |
-|               | Graph Traversal       |               |                       |
+|               | Banana Bunches        | [x] [x] [x]   | Dynamic Programming   |
+|               | Simple Polygon        | [x] [x]       | Pick's Theorem        |
+| F2021         | Trash Bins            | [x] [x]       |                       |
+|               | Festival              | [x] [x]       | Segment Tree          |
+|               | Star Trappers         | [x] [x] [ ]   |                       |
+|               | Graph Traversal       | [x] [ ]       |                       |
