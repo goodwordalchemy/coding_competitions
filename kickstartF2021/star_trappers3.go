@@ -324,36 +324,20 @@ func solution(points [][]int, combosCache CombosCacheType) string {
     result := math.Inf(1)
     var hull, vertices [][]int
 
-    slopeGroups := make(map[Fraction][][]int)
+    slopeGroups := make(map[Fraction][]int)
     var slopeKey Fraction
     // parallelograms:
     // group points by polar angle with blueStar
     for i := 0; i < n; i++ {
         slopeKey = getSlope(blueStar, points[i])
         if _, ok := slopeGroups[slopeKey]; !ok {
-            slopeGroups[slopeKey] = make([][]int, 0)
+            slopeGroups[slopeKey] = points[i]
         }
-        slopeGroups[slopeKey] = append(slopeGroups[slopeKey], points[i])
+        if distance2(points[i], blueStar) < distance2(slopeGroups[slopeKey], blueStar) {
+            slopeGroups[slopeKey] = points[i]
+        }
     }
 
-    // find closestPoints to BlueStar in each group
-    for _, group := range slopeGroups {
-        // if m.Denominator == 0 || m.Numerator == 0 {
-        //     fmt.Println("before", group)
-        // }
-        sort.Slice(group, func(i, j int) bool {
-            return distance2(blueStar, group[i]) < distance2(blueStar, group[j])
-        })
-        // if m.Denominator == 0 || m.Numerator == 0 {
-        //     fmt.Println("after", group)
-        // }
-        // if m.Denominator == 0 || m.Numerator == 0 {
-        //     fmt.Println("zero", m, group)
-        // }
-    }
-    // fmt.Println()
-    // fmt.Println(slopeGroups)
-    // fmt.Println(blueStar)
     for slopeKey, group := range slopeGroups {
         complimentKey := slopeKey.Compliment()
         compliment, ok := slopeGroups[complimentKey]
@@ -361,20 +345,18 @@ func solution(points [][]int, combosCache CombosCacheType) string {
             continue
         }
 
-        for i, _ := range points {
-            if pairEqual(points[i], group[0]) || pairEqual(points[i],  compliment[0]) {
+        for key1, point1 := range slopeGroups {
+            if key1 == complimentKey || key1 == slopeKey {
                 continue
             }
-            for j, _ := range points {
-                if i == j {
-                    continue;
-                }
-                if pairEqual(points[j], group[0]) || pairEqual(points[j],  compliment[0]) {
+            for key2, point2 := range slopeGroups {
+                if key2 == complimentKey || key2 == slopeKey || key1 == key2 {
                     continue
                 }
+
                 vertices = [][]int{
-                    group[0], compliment[0],
-                    points[i], points[j],
+                    group, compliment,
+                    point1, point2,
                 }
                 hull = convexHull(vertices)
                 perimeter := 0.0
@@ -413,47 +395,88 @@ func solution(points [][]int, combosCache CombosCacheType) string {
         }
     }
 
-    combos3, ok := combosCache[n]
-    if !ok {
-        combos3 = combinations(n, 3)
-    }
+    for i := 0; i < len(points); i++{
+        for j := i+1; j < len(points); j++ {
+            for k := j+1; k < len(points); k++ {
+                vertices = [][]int{points[i], points[j], points[k]}
+                hull = convexHull(vertices)
+                perimeter := 0.0
+                onPerimeter := false
+                for i := range hull {
+                    a := hull[i]
+                    b := hull[(i+1) % len(hull)]
+                    perimeter += math.Sqrt(float64(distance2(a, b)))
+                    if perimeter > result {
+                        break
+                    }
+                    if isOnSegment(blueStar, a, b) {
+                        onPerimeter = true
+                        break
+                    }
+                }
+                // if math.Abs(perimeter - 5.656854249) < .03 {
+                //     if onPerimeter && pointInConvexPolygon(blueStar, hull){
+                //         fmt.Println("triagnle pretty close", perimeter, vertices)
+                //     }
+                // }
+                if onPerimeter {
+                    continue
+                }
 
-    for _, combo := range combos3 {
-        vertices = make([][]int, len(combo))
-        for i, idx := range combo {
-            vertices[i] = points[idx]
+                if !pointInConvexPolygon(blueStar, hull) {
+                    continue
+                }
 
-        }
-        hull = convexHull(vertices)
-        perimeter := 0.0
-        onPerimeter := false
-        for i := range hull {
-            a := hull[i]
-            b := hull[(i+1) % len(hull)]
-            perimeter += math.Sqrt(float64(distance2(a, b)))
-            if perimeter > result {
-                break
+                result = math.Min(perimeter, result)
             }
-            if isOnSegment(blueStar, a, b) {
-                onPerimeter = true
-                break
-            }
-        }
-        // if math.Abs(perimeter - 5.656854249) < .03 {
-        //     if onPerimeter && pointInConvexPolygon(blueStar, hull){
-        //         fmt.Println("triagnle pretty close", perimeter, vertices)
-        //     }
-        // }
-        if onPerimeter {
-            continue
+
         }
 
-        if !pointInConvexPolygon(blueStar, hull) {
-            continue
-        }
-
-        result = math.Min(perimeter, result)
     }
+    //
+    // combos3, ok := combosCache[n]
+    // if !ok {
+    //     // combosCache[n] = combinations(n, 3)
+    //     // combos3 = combosCache[n]
+    //     combos3 = combinations(n, 3)
+    // }
+    //
+    // for _, combo := range combos3 {
+    //     vertices = make([][]int, len(combo))
+    //     for i, idx := range combo {
+    //         vertices[i] = points[idx]
+    //
+    //     }
+    //     hull = convexHull(vertices)
+    //     perimeter := 0.0
+    //     onPerimeter := false
+    //     for i := range hull {
+    //         a := hull[i]
+    //         b := hull[(i+1) % len(hull)]
+    //         perimeter += math.Sqrt(float64(distance2(a, b)))
+    //         if perimeter > result {
+    //             break
+    //         }
+    //         if isOnSegment(blueStar, a, b) {
+    //             onPerimeter = true
+    //             break
+    //         }
+    //     }
+    //     // if math.Abs(perimeter - 5.656854249) < .03 {
+    //     //     if onPerimeter && pointInConvexPolygon(blueStar, hull){
+    //     //         fmt.Println("triagnle pretty close", perimeter, vertices)
+    //     //     }
+    //     // }
+    //     if onPerimeter {
+    //         continue
+    //     }
+    //
+    //     if !pointInConvexPolygon(blueStar, hull) {
+    //         continue
+    //     }
+    //
+    //     result = math.Min(perimeter, result)
+    // }
     if result ==  math.Inf(1) {
         return "IMPOSSIBLE"
     }
