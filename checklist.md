@@ -6,5 +6,5 @@
 |               | Simple Polygon        | [x] [x]       | Pick's Theorem        |
 | F2021         | Trash Bins            | [x] [x]       |                       |
 |               | Festival              | [x] [x]       | Segment Tree          |
-|               | Star Trappers         | [x] [x] [ ]   |                       |
+|               | Star Trappers         | [x] [x] [x]   | Point In Polygon      |
 |               | Graph Traversal       | [x] [ ]       |                       |

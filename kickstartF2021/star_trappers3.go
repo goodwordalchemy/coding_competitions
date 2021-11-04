@@ -373,15 +373,7 @@ func solution(points [][]int, combosCache CombosCacheType) string {
                         break
                     }
                 }
-                // if math.Abs(perimeter - 5.656854249) < .03 {
-                //     fmt.Println("pretty close", perimeter, vertices)
-                //     if onPerimeter {
-                //         fmt.Println("on perimeter")
-                //     }
-                //     if !pointInConvexPolygon(blueStar, hull) {
-                //         fmt.Println("not in polygon")
-                //     }
-                // }
+
                 if onPerimeter {
                     continue
                 }
@@ -414,11 +406,6 @@ func solution(points [][]int, combosCache CombosCacheType) string {
                         break
                     }
                 }
-                // if math.Abs(perimeter - 5.656854249) < .03 {
-                //     if onPerimeter && pointInConvexPolygon(blueStar, hull){
-                //         fmt.Println("triagnle pretty close", perimeter, vertices)
-                //     }
-                // }
                 if onPerimeter {
                     continue
                 }
@@ -433,50 +420,6 @@ func solution(points [][]int, combosCache CombosCacheType) string {
         }
 
     }
-    //
-    // combos3, ok := combosCache[n]
-    // if !ok {
-    //     // combosCache[n] = combinations(n, 3)
-    //     // combos3 = combosCache[n]
-    //     combos3 = combinations(n, 3)
-    // }
-    //
-    // for _, combo := range combos3 {
-    //     vertices = make([][]int, len(combo))
-    //     for i, idx := range combo {
-    //         vertices[i] = points[idx]
-    //
-    //     }
-    //     hull = convexHull(vertices)
-    //     perimeter := 0.0
-    //     onPerimeter := false
-    //     for i := range hull {
-    //         a := hull[i]
-    //         b := hull[(i+1) % len(hull)]
-    //         perimeter += math.Sqrt(float64(distance2(a, b)))
-    //         if perimeter > result {
-    //             break
-    //         }
-    //         if isOnSegment(blueStar, a, b) {
-    //             onPerimeter = true
-    //             break
-    //         }
-    //     }
-    //     // if math.Abs(perimeter - 5.656854249) < .03 {
-    //     //     if onPerimeter && pointInConvexPolygon(blueStar, hull){
-    //     //         fmt.Println("triagnle pretty close", perimeter, vertices)
-    //     //     }
-    //     // }
-    //     if onPerimeter {
-    //         continue
-    //     }
-    //
-    //     if !pointInConvexPolygon(blueStar, hull) {
-    //         continue
-    //     }
-    //
-    //     result = math.Min(perimeter, result)
-    // }
     if result ==  math.Inf(1) {
         return "IMPOSSIBLE"
     }
@@ -509,10 +452,6 @@ func main() {
             points = append(points, []int{X, Y})
         }
 
-        // if i != 93 {
-        //     continue
-        // }
-        // fmt.Println(points)
         result := solution(points, combosCache)
         fmt.Printf("Case #%d: %s\n", i, result)
     }

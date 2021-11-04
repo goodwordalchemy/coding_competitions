@@ -3,7 +3,7 @@ from itertools import combinations
 from functools import reduce
 from scipy.spatial import ConvexHull
 
-DEV = True
+DEV = False
 
 def make_sample_text_from_lines():
 	sample_text = """1
