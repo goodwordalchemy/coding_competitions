@@ -1,5 +1,9 @@
 |   Round       |   Problem             |   Test Sets   |   Notes               |
 | ------------- | --------------------- | ------------  | --------------------  |
+| H2021         | Transform the String  | [x] [x]       |                       |
+|               | Painter               | [x] [x]       |                       |
+|               | Silly Substitutions   | [x] [ ]       |                       |
+|               | Dependent Events      | [ ] [ ]       |                       |
 | G2021         | Dogs and Cats         | [x] [x]       |                       |
 |               | Staying Hydrated      | [x] [x]       | Line Sweep            |
 |               | Banana Bunches        | [x] [x] [x]   | Dynamic Programming   |
