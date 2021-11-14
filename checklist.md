@@ -2,7 +2,7 @@
 | ------------- | --------------------- | ------------  | --------------------  |
 | H2021         | Transform the String  | [x] [x]       |                       |
 |               | Painter               | [x] [x]       |                       |
-|               | Silly Substitutions   | [x] [ ]       |                       |
+|               | Silly Substitutions   | [x] [x]       | Linked List           |
 |               | Dependent Events      | [ ] [ ]       |                       |
 | G2021         | Dogs and Cats         | [x] [x]       |                       |
 |               | Staying Hydrated      | [x] [x]       | Line Sweep            |

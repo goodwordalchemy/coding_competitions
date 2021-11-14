@@ -1,6 +1,4 @@
-from collections import Counter
-
-DEV = True
+DEV = False
 
 sample_text = """7
 3
@@ -19,16 +17,20 @@ sample_text = """7
 10
 """
 
+sample_text = """1
+{}
+523682305021737909598451707498860955107428866940862351771569298500297852990189896277685441775
+""".format(len("523682305021737909598451707498860955107428866940862351771569298500297852990189896277685441775"))
+
 
 if DEV:
     from collections import deque
     from unittest.mock import MagicMock
+
     sample_lines = deque(sample_text.split("\n"))
 
-    input = MagicMock(side_effect=lambda : sample_lines.popleft())
+    input = MagicMock(side_effect=lambda: sample_lines.popleft())
 
-
-CACHE_TO_LENGTH = 4
 
 substitutions = [
     ("01", "2"),
@@ -43,12 +45,145 @@ substitutions = [
     ("90", "1"),
 ]
 
+substitutions_mapping = dict(substitutions)
+substitutables = list(zip(*substitutions))[0]
+
+substitutable_idx = {s: i for i, s in enumerate(substitutables)}
+
+
 def parse_input():
     n_test_cases = int(input())
     for t in range(n_test_cases):
         _ = input()
         N = input()
         yield (N,)
+
+
+class ListNode:
+    def __init__(self, val, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+    @property
+    def val2(self):
+        if self.right.val is None:
+            return
+        elif self.val is None:
+            return 
+        return self.val + self.right.val
+
+
+class DLList:
+    def __init__(self):
+        leader = ListNode(None)
+        leader.right = leader
+        leader.left = leader
+
+        self.leader = leader
+
+    def insert_right(self, before, node):
+        after = before.right
+
+        node.left = before
+        before.right = node
+
+        after.left = node
+        node.right = after
+
+    def append(self, node):
+        self.insert_right(self.leader.left, node)
+
+    def remove(self, node):
+        before = node.left
+        after = node.right
+
+        node.left = node.right = None
+        before.right = after
+        after.left = before
+
+    @property
+    def last(self):
+        return self.leader.left
+
+    def __iter__(self):
+        cur = self.leader.right
+
+        while cur != self.leader:
+            yield cur
+            cur = cur.right
+
+
+def solution(N):
+    # print(N)
+    interesting = {}
+    for pattern in substitutables:
+        interesting[pattern] = set()
+
+    dl_list = DLList()
+    dl_list.append(ListNode(N[0]))
+
+    for elt in N[1:]:
+        dl_list.append(ListNode(elt))
+
+        val2 = dl_list.last.left.val2
+        if val2 in substitutables:
+            interesting[val2].add(dl_list.last.left)
+
+    while sum(len(v) for v in interesting.values()):
+        # print(interesting)
+        for pattern in substitutables:
+            while interesting[pattern]:
+                node = interesting[pattern].pop()
+                # filter out nodes that have been subject to replaement
+                if not node.right and not node.left:
+                    continue
+                assert node.right and node.left
+
+                val2 = node.val2
+                if val2 not in substitutions_mapping:
+                    continue
+
+
+                before = node.left
+                after = node.right
+
+                dl_list.remove(node)
+                dl_list.remove(after)
+
+                if val2 is None:
+                    continue
+
+                new_node = ListNode(substitutions_mapping[val2])
+                dl_list.insert_right(before, new_node)
+
+                # interestingness_cur = (
+                #     substitutable_idx.
+                #     get(new_node.val2, float("inf")),
+                # )
+                # interestingness_left = (
+                #     substitutable_idx.
+                #     get(new_node.left.val2, float("inf")),
+                # )
+                #
+                # if interestingness_cur < interestingness_left:
+                #     most_interesting = new_node
+                # else:
+                #     most_interesting = new_node.left
+                #
+                # if most_interesting.val2 in substitutions_mapping:
+                #     interesting[most_interesting.val2].add(new_node)
+
+                if new_node.val2 in substitutions_mapping:
+                    interesting[new_node.val2].add(new_node)
+                if new_node.left.val2 in substitutions_mapping:
+                    interesting[new_node.left.val2].add(new_node.left)
+
+
+    # for item in dl_list:
+    #     print(item)
+    result = "".join(elt.val for elt in dl_list)
+    return result
 
 
 def do_substitutions(N):
@@ -62,7 +197,7 @@ def do_substitutions(N):
                 result.append(cur[-1])
                 break
 
-            two = "".join(cur[i:i+2])
+            two = "".join(cur[i : i + 2])
             if two == to_sub:
                 result.append(sub_to)
                 i += 1
@@ -71,13 +206,12 @@ def do_substitutions(N):
             i += 1
         cur = result
 
-
     # print("N", "".join(N))
     # print("cur", "".join(cur))
     return cur
 
 
-def solution1(N):
+def solution2(N):
     prev = list(N)
     cur = do_substitutions(prev)
 
@@ -88,99 +222,10 @@ def solution1(N):
     return "".join(cur)
 
 
-"""
-the idea is to get a 10x speedup by precomputing substitutions of all strings
-up to length 10
-
-how do I precompute substitutions?
-one idea is recursion with memoization, but if a string goes N steps deep,
-python will raise.  I've got to do it iteratively
-
-start with 3.  For each substitution of size two, and for each digit, append
-the digit to the result of the substitution and the "reduce"
-
-then scan the string and start substituting in groups of 10
-
-
-What happened is that there are edges that may have to be substituted first.
-
-I proposed to solve this issue by setting one ahead and one behind and then 
-voting.
-
-The other issue was how to precompute  the substitutions.  I think this can be
-done by iterating over each size up to the max size you desire.  For each
-size you can use the substitutions from 2 sizes down (so you get a quorum for
-voting.  But I have no idea).
-"""
-
-subs_cache = dict(substitutions)
-for i in range(10):
-    subs_cache[str(i)] = str(i)
-
-def precompute_substitutions(max_size, cur_size):
-    votes = [Counter() for _ in range(len(N))]
-
-    for i in range(max_size):
-
-        sub = N[i:i+cur_size]
-        for j in range(CACHE_TO_LENGTH):
-            votes[i+j][N[i+j]] += 1
-
-    result = [v.most_common(1)[0] for v in votes]
-
-
-
-precompute_substitutions(9, 2)
-
-def precompute_substitutions_garbage(max_size=CACHE_TO_LENGTH):
-    result = dict(substitutions)
-    for i in range(10):
-        result[str(i)] = str(i)
-
-    for j in range(3, max_size+1):
-        for prev in range(10**j):
-            for i in range(10):
-                cur = str(prev).zfill(j) + str(i)
-                result[str(i)] = solution1(cur)
-
-    return result
-
-
-
-"""
-one way to do this is to make a counter for every index in the string
-
-then use the highest voted
-"""
-def do_subs_big(N, length):
-    if len(N) <= CACHE_TO_LENGTH:
-        return subs_cache[N]
-
-    votes = [Counter() for _ in range(len(N))]
-
-    for i in range(len(N)-CACHE_TO_LENGTH):
-        sub = N[i:i+CACHE_TO_LENGTH]
-        for j in range(CACHE_TO_LENGTH):
-            votes[i+j][N[i+j]] += 1
-
-    result = [v.most_common(1)[0] for v in votes]
-
-
-def solution(N):
-    prev = list(N)
-    cur = do_subs_big(prev)
-
-    while prev != cur:
-        prev = cur
-        cur = do_subs_big(prev)
-
-    return "".join(cur)
-
-
-
 def main():
     for i, test_case in enumerate(parse_input()):
-        print("Case #{}: {}".format(i+1, solution(*test_case)))
+        print("Case #{}: {}".format(i + 1, solution(*test_case)))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

@@ -1,4 +1,4 @@
-DEV = True
+DEV = False
 
 sample_text = """7
 3
@@ -21,9 +21,10 @@ sample_text = """7
 if DEV:
     from collections import deque
     from unittest.mock import MagicMock
+
     sample_lines = deque(sample_text.split("\n"))
 
-    input = MagicMock(side_effect=lambda : sample_lines.popleft())
+    input = MagicMock(side_effect=lambda: sample_lines.popleft())
 
 
 substitutions = [
@@ -38,6 +39,7 @@ substitutions = [
     ("89", "0"),
     ("90", "1"),
 ]
+
 
 def parse_input():
     n_test_cases = int(input())
@@ -58,7 +60,7 @@ def do_substitutions(N):
                 result.append(cur[-1])
                 break
 
-            two = "".join(cur[i:i+2])
+            two = "".join(cur[i : i + 2])
             if two == to_sub:
                 result.append(sub_to)
                 i += 1
@@ -66,7 +68,6 @@ def do_substitutions(N):
                 result.append(cur[i])
             i += 1
         cur = result
-
 
     # print("N", "".join(N))
     # print("cur", "".join(cur))
@@ -86,7 +87,8 @@ def solution(N):
 
 def main():
     for i, test_case in enumerate(parse_input()):
-        print("Case #{}: {}".format(i+1, solution(*test_case)))
+        print("Case #{}: {}".format(i + 1, solution(*test_case)))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
