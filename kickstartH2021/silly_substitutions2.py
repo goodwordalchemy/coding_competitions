@@ -1,3 +1,12 @@
+"""
+2 key insights.
+
+1. use a set of "interesting locations" organized with substitution order.
+This way it saves you a lot of iterating through the list.
+
+
+2. use a linked list so you can add and remove in constant time.
+"""
 DEV = False
 
 sample_text = """7
@@ -157,31 +166,12 @@ def solution(N):
                 new_node = ListNode(substitutions_mapping[val2])
                 dl_list.insert_right(before, new_node)
 
-                # interestingness_cur = (
-                #     substitutable_idx.
-                #     get(new_node.val2, float("inf")),
-                # )
-                # interestingness_left = (
-                #     substitutable_idx.
-                #     get(new_node.left.val2, float("inf")),
-                # )
-                #
-                # if interestingness_cur < interestingness_left:
-                #     most_interesting = new_node
-                # else:
-                #     most_interesting = new_node.left
-                #
-                # if most_interesting.val2 in substitutions_mapping:
-                #     interesting[most_interesting.val2].add(new_node)
-
                 if new_node.val2 in substitutions_mapping:
                     interesting[new_node.val2].add(new_node)
                 if new_node.left.val2 in substitutions_mapping:
                     interesting[new_node.left.val2].add(new_node.left)
 
 
-    # for item in dl_list:
-    #     print(item)
     result = "".join(elt.val for elt in dl_list)
     return result
 
@@ -206,8 +196,6 @@ def do_substitutions(N):
             i += 1
         cur = result
 
-    # print("N", "".join(N))
-    # print("cur", "".join(cur))
     return cur
 
 

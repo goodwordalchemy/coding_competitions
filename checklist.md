@@ -11,4 +11,4 @@
 | F2021         | Trash Bins            | [x] [x]       |                       |
 |               | Festival              | [x] [x]       | Segment Tree          |
 |               | Star Trappers         | [x] [x] [x]   | Point In Polygon      |
-|               | Graph Traversal       | [x] [ ]       |                       |
+|               | Graph Traversal       | [x] [x]       | Bit Mask DP           |
